@@ -63,7 +63,7 @@ def conv2d(_X, w, sigmoid=False, bn=False):
 
 def colornet(_tensors):
     """
-    http://tinyclouds.org/colorize/residual_encoder.png
+    Network architecture http://tinyclouds.org/colorize/residual_encoder.png
     """
     with tf.variable_scope('colornet'):
         # Bx28x28x512 -> batch norm -> 1x1 conv = Bx28x28x256
@@ -277,7 +277,7 @@ try:
             sys.stdout.flush()
             writer.add_summary(merged_, step)
             writer.flush()
-        if step % 100000 == 999998:
+        if step % 100000 == 99998:
             save_path = saver.save(sess, "model.ckpt")
             print("Model saved in file: %s" % save_path)
             sys.stdout.flush()
