@@ -4,13 +4,8 @@ Neural Network to colorize grayscale images
 Results
 -------
 
+![grayscale-pred-groundtruth](summary/3000_0.png?raw=true "grayscale-pred-groundtruth-3000")
 
-Validation
-----------
-| Iteration | Grayscale /Predicted / Ground Truth |
-| --- | --- |
-|1||
-|2||
 
 Sources
 -------
