@@ -1,15 +1,11 @@
-import os
 import tensorflow as tf
 import numpy as np
 import glob
 import sys
 from matplotlib import pyplot as plt
-import skimage.io
-from tensorflow.python import control_flow_ops
-from itertools import cycle
 from batchnorm import ConvolutionalBatchNormalizer
 
-filenames = glob.glob("../colornet/*/*.jpg")
+filenames = sorted(glob.glob("../colornet/*/*.jpg"))
 batch_size = 1
 num_epochs = 1e+9
 
@@ -32,7 +28,7 @@ def read_my_file_format(filename_queue, randomize=False):
 
 def input_pipeline(filenames, batch_size, num_epochs=None):
     filename_queue = tf.train.string_input_producer(
-        filenames, num_epochs=num_epochs, shuffle=True)
+        filenames, num_epochs=num_epochs, shuffle=False)
     example = read_my_file_format(filename_queue, randomize=False)
     min_after_dequeue = 100
     capacity = min_after_dequeue + 3 * batch_size
@@ -43,22 +39,24 @@ def input_pipeline(filenames, batch_size, num_epochs=None):
 
 
 def batch_norm(x, depth, phase_train):
-    ewma = tf.train.ExponentialMovingAverage(decay=0.9999)
-    bn = ConvolutionalBatchNormalizer(depth, 0.001, ewma, True)
-    update_assignments = bn.get_assigner()
-    x = bn.normalize(x, train=phase_train)
+    with tf.variable_scope('batchnorm'):
+        ewma = tf.train.ExponentialMovingAverage(decay=0.9999)
+        bn = ConvolutionalBatchNormalizer(depth, 0.001, ewma, True)
+        update_assignments = bn.get_assigner()
+        x = bn.normalize(x, train=phase_train)
     return x
 
 
 def conv2d(_X, w, sigmoid=False, bn=False):
-    _X = tf.nn.conv2d(_X, w, [1, 1, 1, 1], 'SAME')
-    if bn:
-        _X = batch_norm(_X, w.get_shape()[3], phase_train)
-    if sigmoid:
-        return tf.sigmoid(_X)
-    else:
-        _X = tf.nn.relu(_X)
-        return tf.maximum(0.01 * _X, _X)
+    with tf.variable_scope('conv2d'):
+        _X = tf.nn.conv2d(_X, w, [1, 1, 1, 1], 'SAME')
+        if bn:
+            _X = batch_norm(_X, w.get_shape()[3], phase_train)
+        if sigmoid:
+            return tf.sigmoid(_X)
+        else:
+            _X = tf.nn.relu(_X)
+            return tf.maximum(0.01 * _X, _X)
 
 
 def colornet(_tensors):
@@ -122,7 +120,7 @@ def concat_images(imga, imgb):
 
 def rgb2yuv(rgb):
     """
-    Convert RGB image to YUV https://en.wikipedia.org/wiki/YUV
+    Convert RGB image into YUV https://en.wikipedia.org/wiki/YUV
     """
     rgb2yuv_filter = tf.constant(
         [[[[0.299, -0.169, 0.499],
@@ -138,7 +136,7 @@ def rgb2yuv(rgb):
 
 def yuv2rgb(yuv):
     """
-    Convert YUV image to RGB https://en.wikipedia.org/wiki/YUV
+    Convert YUV image into RGB https://en.wikipedia.org/wiki/YUV
     """
     yuv = tf.mul(yuv, 255)
     yuv2rgb_filter = tf.constant(
@@ -161,21 +159,22 @@ with open("vgg/tensorflow-vgg16/vgg16-20160129.tfmodel", mode='rb') as f:
 graph_def = tf.GraphDef()
 graph_def.ParseFromString(fileContent)
 
-# Store layers weight
-weights = {
-    # 1x1 conv, 512 inputs, 256 outputs
-    'wc1': tf.Variable(tf.truncated_normal([1, 1, 512, 256], stddev=0.01)),
-    # 3x3 conv, 512 inputs, 128 outputs
-    'wc2': tf.Variable(tf.truncated_normal([3, 3, 256, 128], stddev=0.01)),
-    # 3x3 conv, 256 inputs, 64 outputs
-    'wc3': tf.Variable(tf.truncated_normal([3, 3, 128, 64], stddev=0.01)),
-    # 3x3 conv, 128 inputs, 3 outputs
-    'wc4': tf.Variable(tf.truncated_normal([3, 3, 64, 3], stddev=0.01)),
-    # 3x3 conv, 6 inputs, 3 outputs
-    'wc5': tf.Variable(tf.truncated_normal([3, 3, 3, 3], stddev=0.01)),
-    # 3x3 conv, 3 inputs, 2 outputs
-    'wc6': tf.Variable(tf.truncated_normal([3, 3, 3, 2], stddev=0.01)),
-}
+with tf.variable_scope('colornet'):
+    # Store layers weight
+    weights = {
+        # 1x1 conv, 512 inputs, 256 outputs
+        'wc1': tf.Variable(tf.truncated_normal([1, 1, 512, 256], stddev=0.01)),
+        # 3x3 conv, 512 inputs, 128 outputs
+        'wc2': tf.Variable(tf.truncated_normal([3, 3, 256, 128], stddev=0.01)),
+        # 3x3 conv, 256 inputs, 64 outputs
+        'wc3': tf.Variable(tf.truncated_normal([3, 3, 128, 64], stddev=0.01)),
+        # 3x3 conv, 128 inputs, 3 outputs
+        'wc4': tf.Variable(tf.truncated_normal([3, 3, 64, 3], stddev=0.01)),
+        # 3x3 conv, 6 inputs, 3 outputs
+        'wc5': tf.Variable(tf.truncated_normal([3, 3, 3, 3], stddev=0.01)),
+        # 3x3 conv, 3 inputs, 2 outputs
+        'wc6': tf.Variable(tf.truncated_normal([3, 3, 3, 2], stddev=0.01)),
+    }
 
 colorimage = input_pipeline(filenames, batch_size, num_epochs=num_epochs)
 colorimage_yuv = rgb2yuv(colorimage)
@@ -189,10 +188,11 @@ tf.import_graph_def(graph_def, input_map={"images": grayscale})
 
 graph = tf.get_default_graph()
 
-conv1_2 = graph.get_tensor_by_name("import/conv1_2/Relu:0")
-conv2_2 = graph.get_tensor_by_name("import/conv2_2/Relu:0")
-conv3_3 = graph.get_tensor_by_name("import/conv3_3/Relu:0")
-conv4_3 = graph.get_tensor_by_name("import/conv4_3/Relu:0")
+with tf.variable_scope('vgg'):
+    conv1_2 = graph.get_tensor_by_name("import/conv1_2/Relu:0")
+    conv2_2 = graph.get_tensor_by_name("import/conv2_2/Relu:0")
+    conv3_3 = graph.get_tensor_by_name("import/conv3_3/Relu:0")
+    conv4_3 = graph.get_tensor_by_name("import/conv4_3/Relu:0")
 
 tensors = {
     "conv1_2": conv1_2,
@@ -230,7 +230,7 @@ tf.histogram_summary("weights3", weights["wc3"])
 tf.histogram_summary("weights4", weights["wc4"])
 tf.histogram_summary("weights5", weights["wc5"])
 tf.histogram_summary("weights6", weights["wc6"])
-tf.histogram_summary("loss", tf.reduce_mean(loss))
+tf.histogram_summary("instant_loss", tf.reduce_mean(loss))
 tf.image_summary("colorimage", colorimage, max_images=1)
 tf.image_summary("pred_rgb", pred_rgb, max_images=1)
 tf.image_summary("grayscale", grayscale_rgb, max_images=1)
