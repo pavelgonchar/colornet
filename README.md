@@ -3,8 +3,11 @@ Neural Network to colorize grayscale images
 
 Results
 -------
-
+|Grayscale|Prediction|Ground Truth|
+|---|---|---|
 ![grayscale-pred-groundtruth](summary/3000_0.png?raw=true "grayscale-pred-groundtruth-3000")
+
+![grayscale-pred-groundtruth](summary/7000_0.png?raw=true "grayscale-pred-groundtruth-7000")
 
 
 Sources
