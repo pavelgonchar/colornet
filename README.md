@@ -1,11 +1,16 @@
 #colornet
 Neural Network to colorize grayscale images
 
-Training
---------
+Results
+-------
+
+
+Validation
+----------
 | Iteration | Grayscale /Predicted / Ground Truth |
 | --- | --- |
 |1||
+|2||
 
 Sources
 -------
