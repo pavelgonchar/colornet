@@ -11,6 +11,8 @@ Results
 
 ![grayscale-pred-groundtruth](summary/7000_0.png?raw=true "grayscale-pred-groundtruth-7000")
 
+![grayscale-pred-groundtruth](summary/88000_0.png?raw=true "grayscale-pred-groundtruth-88000")
+
 ![grayscale-pred-groundtruth](summary/99000_0.png?raw=true "grayscale-pred-groundtruth-99000")
 
 Sources
