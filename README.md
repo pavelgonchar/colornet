@@ -23,6 +23,8 @@ Results
 
 ![grayscale-pred-groundtruth](summary/329000_0.png?raw=true "grayscale-pred-groundtruth-329000")
 
+![grayscale-pred-groundtruth](summary/428000_0.png?raw=true "grayscale-pred-groundtruth-428000")
+
 Sources
 -------
 - [Automatic Colorization](http://tinyclouds.org/colorize/)
