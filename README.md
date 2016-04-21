@@ -9,7 +9,7 @@ Results
 
 ![grayscale-pred-groundtruth](summary/295000_0.png?raw=true "grayscale-pred-groundtruth-295000")
 
-![grayscale-pred-groundtruth](summary/7000_0.png?raw=true "grayscale-pred-groundtruth-7000")
+![grayscale-pred-groundtruth](summary/496000.png?raw=true "grayscale-pred-groundtruth-496000")
 
 ![grayscale-pred-groundtruth](summary/88000_0.png?raw=true "grayscale-pred-groundtruth-88000")
 
