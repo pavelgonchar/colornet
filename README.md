@@ -25,6 +25,10 @@ Results
 
 ![grayscale-pred-groundtruth](summary/428000_0.png?raw=true "grayscale-pred-groundtruth-428000")
 
+Eiji K used colornet for anime colorization
+#
+[![Sally the Witch 1966](http://c2n.me/3xw6w3D.jpg)](http://www.youtube.com/watch?v=ysb_5ezwIeM)
+
 Sources
 -------
 - [Automatic Colorization](http://tinyclouds.org/colorize/)
